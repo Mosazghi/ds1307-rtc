@@ -1,118 +1,44 @@
-/* USER CODE BEGIN Header */
 /**
  ******************************************************************************
  * @file           : main.c
- * @brief          : Main program body
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2023 STMicroelectronics.
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
+ * @author         : Mosazghi
  ******************************************************************************
  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 #include "ds1307.h"
-#include "stdio.h"
+#include <stdio.h>
 #include <string.h>
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-HAL_StatusTypeDef ret;
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
 UART_HandleTypeDef huart2;
 
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
-/* USER CODE BEGIN PFP */
-/* USER CODE END PFP */
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
 RTC_date_t date_now;
-static void test_blink() {
-  // Declare the variable
-  // uint8_t buf[20];
-  // strcpy((char*)buf, "Hello!!\r\n");
-  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-  // HAL_UART_Transmit(&huart2, buf, sizeof(buf), 100);
-  // HAL_Delay(1000);
-}
-/* USER CODE END 0 */
 
-/**
- * @brief  The application entry point.
- * @retval int
- */
 int main(void) {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU
-     Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the
-   * Systick.
-   */
+  // Initialize system 
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
-  /* USER CODE BEGIN 2 */
+
   uint8_t buf[100];
-  // const char *DAYS_OF_WEEK[7] = {"Sunday",   "Monday", "Tuesday",
-  // "Wednesday",
-  //                                "Thursday", "Friday", "Saturday"};
+  const char *DAYS_OF_WEEK[7] = {"Sunday",   "Monday", "Tuesday", "Wednesday",
+                                 "Thursday", "Friday", "Saturday"};
   ds1307_init(&hi2c1);
 
   RTC_date_t currentTime;
+
+  /*
+    NOTE: Uncomment the following lines to set the time to DS1307
+  */
   // currentTime.hours = 22;
   // currentTime.minutes = 49;
   // currentTime.seconds = 0;
@@ -122,28 +48,25 @@ int main(void) {
   // currentTime.year = 23; // Year 2023
 
   // ds1307_set_time(&currentTime);
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
   while (1) {
-    test_blink();
-    ds1307_get_time(&currentTime);
+    ds1307_get_time(&currentTime); // Get current time from DS1307
 
-    sprintf((char *)buf, "%02d:%02d:%02d, %02d-%02d-20%02d\r\n",
+    // Convert the current time to string
+    sprintf((char *)buf, "%02d:%02d:%02d, %s %02d.%02d.20%02d\r\n",
             currentTime.hours, currentTime.minutes, currentTime.seconds,
-            currentTime.date, currentTime.month, currentTime.year);
+            DAYS_OF_WEEK[currentTime.day], currentTime.date, currentTime.month,
+            currentTime.year);
 
+    // Transmit via UART the current time
     HAL_UART_Transmit(&huart2, buf, strlen((char *)buf), HAL_MAX_DELAY);
 
     HAL_Delay(1000);
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
   }
-  /* USER CODE END 3 */
 }
 
+/****************BELOW ARE AUTO-GENERATED CODE BY
+ * STM32CUBEMX*****************************/
 /**
  * @brief System Clock Configuration
  * @retval None
@@ -266,7 +189,6 @@ static void MX_USART2_UART_Init(void) {
 
 /**
  * @brief GPIO Initialization Function
- * @param None
  * @retval None
  */
 static void MX_GPIO_Init(void) {
@@ -301,7 +223,7 @@ static void MX_GPIO_Init(void) {
 }
 
 /**
- * @brief  This function is executed in case of error occurrence.
+ * @brief  This function is executed in case of error occurrence
  * @retval None
  */
 void Error_Handler(void) {
@@ -312,4 +234,3 @@ void Error_Handler(void) {
   }
   /* USER CODE END Error_Handler_Debug */
 }
-

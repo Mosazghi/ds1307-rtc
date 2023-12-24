@@ -27,7 +27,7 @@ enum WEEKDAY {
   SUNDAY
 };
 
-// DS1307 time struct 
+// DS1307 time struct
 typedef struct {
   uint8_t seconds; //< 0-59
   uint8_t minutes; //< 0-59
